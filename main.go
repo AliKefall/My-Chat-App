@@ -1,16 +1,16 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
+	"net/http"
+
+	"github.com/AliKefall/My-Chat-App/internal/config"
 )
 
-func main() {
-	app := fiber.New()
+type cfg struct {
+	user config.User
+}
 
-	app.Use(cors.New())
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-	app.Listen(":8080")
+func main() {
+	mux := http.NewServeMux()
+
 }
