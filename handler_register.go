@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/AliKefall/My-Chat-App/internal/auth"
-	"github.com/AliKefall/My-Chat-App/internal/config"
+	"github.com/AliKefall/My-Chat-App/internal/database"
 )
 
-func handleUserRegister(w http.ResponseWriter, r *http.Request) {
+func (cfg *config) handleUserRegister(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -33,10 +34,23 @@ func handleUserRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := config.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: hashedPassword,
+	user := database.User{
+		Username:  req.Username,
+		Password:  hashedPassword,
+		Email:     req.Email,
+		CreatedAt: time.Now().Format(time.RFC3339),
+		UpdatedAt: time.Now().Format(time.RFC3339),
 	}
 
+	err = cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+		Username:  user.Username,
+		Password:  user.Password,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	})
+
+	respondWithJSON(w, http.StatusOK, map[string]string{
+		"message": "User has been saved succesfully",
+	})
 }

@@ -1,12 +1,8 @@
+
 -- name: CreateUser :exec
-insert into users(id, username, email, created_at, updated_at)
-values(
-	$1,
-	$2,
-	$3,
-	$4,
-	$5
-);
+INSERT INTO users(id, username,password ,email, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetUser :one
-select * from users where id = $1;
+SELECT * FROM users WHERE id = ?;
+
