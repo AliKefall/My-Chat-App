@@ -33,5 +33,8 @@ func main() {
 	}
 
 	mux.HandleFunc("POST /api/register", cfg.handleUserRegister)
+	mux.HandleFunc("/ws", cfg.handlerWebsocketConn)
+
+	go handleMessages()
 
 }
