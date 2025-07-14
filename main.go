@@ -1,14 +1,13 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/AliKefall/My-Chat-App/internal/database"
 	"github.com/joho/godotenv"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 type config struct {
@@ -17,37 +16,51 @@ type config struct {
 }
 
 func main() {
-	mux := http.NewServeMux()
+	// .env dosyasını yükle (Geliştirme ortamı için)
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Database url could not be loaded: %s", err)
-	}
-	dbUrl := os.Getenv("DB_URL")
-	if dbUrl == "" {
-		log.Fatal("DB_URL must be set")
+		log.Println(".env dosyası yüklenemedi, devam ediliyor (production ortamında bu normaldir)")
 	}
 
-	dbConn, err := sql.Open("sqlite3", dbUrl)
-	if err != nil {
-		log.Fatalf("Error opening databse: %s", err)
+	// Ortam değişkenlerinden DB bağlantı adresini al
+	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("HATA: DB_URL ortam değişkeni ayarlanmalı")
 	}
+
+	// LibSQL (Turso) bağlantısı oluştur
+	dbConn, err := libsql.Open("libsql", dbURL)
+	if err != nil {
+		log.Fatalf("Veritabanına bağlanılamadı: %v", err)
+	}
+	defer dbConn.Close()
+
+	// Sorgular için wrapper oluştur
 	dbQueries := database.New(dbConn)
 
+	// Yapılandırma nesnesi oluştur
 	cfg := config{
 		Port: ":8080",
 		db:   dbQueries,
 	}
 
+	// Router oluştur
+	mux := http.NewServeMux()
+
+	// API ve WebSocket uç noktaları
 	mux.HandleFunc("POST /api/register", cfg.handleUserRegister)
 	mux.HandleFunc("/wss", cfg.handlerWebsocketConn)
+
+	// Statik frontend dosyaları
 	fs := http.FileServer(http.Dir("./frontend"))
 	mux.Handle("/", fs)
 
+	// Mesajları yöneten goroutine başlat
 	go handleMessages()
 
-	log.Printf("Server is running at http://localhost%s", cfg.Port)
+	log.Printf("Sunucu çalışıyor: http://localhost%s", cfg.Port)
 	err = http.ListenAndServe(cfg.Port, mux)
 	if err != nil {
-		log.Fatalf("Server Failed: %s", err)
+		log.Fatalf("Sunucu başlatılamadı: %v", err)
 	}
 }
