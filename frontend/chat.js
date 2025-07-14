@@ -31,7 +31,7 @@ const UI = (() => {
 const SocketClient = (() => {
 	let socket;
 	const connect = username => {
-		socket = new WebSocket(`ws://${window.location.host}/ws`);
+		socket = new WebSocket(`wss://${window.location.host}/ws`);
 		socket.onopen = () => UI.showChat();
 		socket.onmessage = event => UI.addMessage(JSON.parse(event.data));
 		socket.onclose = () => console.log('Bağlantı kesildi');

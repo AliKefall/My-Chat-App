@@ -39,7 +39,7 @@ func main() {
 	}
 
 	mux.HandleFunc("POST /api/register", cfg.handleUserRegister)
-	mux.HandleFunc("/ws", cfg.handlerWebsocketConn)
+	mux.HandleFunc("/wss", cfg.handlerWebsocketConn)
 	fs := http.FileServer(http.Dir("./frontend"))
 	mux.Handle("/", fs)
 
