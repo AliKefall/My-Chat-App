@@ -8,9 +8,8 @@ import (
 )
 
 type Message struct {
-	Username  string `json:"username"`
-	Message   string `json:"message"`
-	Timestamp string `json:"timestamp"`
+	Username string `json:"username"`
+	Message  string `json:"Message"`
 }
 
 var (
@@ -23,10 +22,10 @@ var (
 	}
 )
 
-func (cfg *config) handlerWebsocketConn(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handlerWebsocketConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println("Upgrader error", err)
+		fmt.Println("Upgrader Error!: ", err)
 		return
 	}
 
@@ -39,10 +38,9 @@ func (cfg *config) handlerWebsocketConn(w http.ResponseWriter, r *http.Request) 
 
 	for {
 		var msg Message
-
 		err := conn.ReadJSON(&msg)
 		if err != nil {
-			fmt.Println("Reading error: ", err)
+			fmt.Println("Reading Error: ", err)
 			break
 		}
 		broadcast <- msg
@@ -53,10 +51,11 @@ func (cfg *config) handlerWebsocketConn(w http.ResponseWriter, r *http.Request) 
 func handleMessages() {
 	for {
 		msg := <-broadcast
+
 		for client := range clients {
 			err := client.WriteJSON(msg)
 			if err != nil {
-				fmt.Println("Writing error: ", err)
+				fmt.Println("Writing Error: ", err)
 				client.Close()
 				delete(clients, client)
 			}

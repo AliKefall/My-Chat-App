@@ -1,8 +1,18 @@
+-- name: CreateUser :one
+INSERT INTO users (
+    id,
+    created_at,
+    updated_at,
+	username,
+	password,
+	email
 
--- name: CreateUser :exec
-INSERT INTO users(id, username,password ,email, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?);
-
--- name: GetUser :one
-SELECT * FROM users WHERE id = ?;
-
+) VALUES ( 
+    gen_random_uuid(),
+    NOW(),
+    NOW(),
+    $1,
+    $2,
+    $3
+)
+RETURNING *;
