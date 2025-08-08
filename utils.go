@@ -18,7 +18,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) {
 	w.Write(dat)
 }
 
-func respondWithError(w http.ResponseWriter, msg string, code int, err error) {
+func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	if err != nil {
 		log.Println(err)
 	}
