@@ -1,27 +1,26 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
 	"net/http"
-	"path/filepath"
-
-	"github.com/go-chi/chi/v5"
+	"os"
 )
 
 func main() {
-	r := chi.NewRouter()
+	connStr := os.Getenv("DB_CONN_STR")
+	dbConn, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal("Couldn't connect to database: ", err)
+	}
+	defer dbConn.Close()
 
-	// Root -> index.html
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		indexPath := filepath.Join("web", "index.html")
-		http.ServeFile(w, r, indexPath)
-	})
+	srv := NewServer(dbConn, "8080")
+	fsHandler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
+	srv.Router.Handle("/app/", fsHandler)
 
-	// Statik dosyalar (css, js, images vs.)
-	fileServer := http.FileServer(http.Dir("./web"))
-	r.Handle("/static/*", http.StripPrefix("/static", fileServer))
-
-	fmt.Println("Server başlatıldı: http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	srv.Router.HandleFunc("POST /api/register", srv.handleUserRegister)
+	srv.Router.HandleFunc("POST /api/login", srv.handleUserLogin)
+	log.Println("Server is started on: http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":"+srv.PORT, srv.Router))
 }

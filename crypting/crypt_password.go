@@ -1,23 +1,20 @@
 package crypting
 
 import (
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
-func HashPassword(password, salt string) string {
-	hash := sha256.Sum256([]byte(password + salt))
-	return fmt.Sprintf("%x", hash)
-}
-
-func GenerateSalt() (string, error) {
-	salt := make([]byte, 16)
-	_, err := rand.Read(salt)
+// HashPassword -
+func HashPassword(password string) (string, error) {
+	dat, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
-
-	return hex.EncodeToString(salt), nil
+	return string(dat), nil
 }
+
+// CheckPasswordHash -
+func CheckPasswordHash(password, hash string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+}
+

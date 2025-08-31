@@ -6,6 +6,9 @@ returning *;
 -- name: GetUserByUsername :one
 select * from users where username = $1;
 
+-- name: GetUserByEmail :one
+select * from users where email = $1;
+
 -- name: CreateMessage :one
 insert into messages (user_id, content, iv, salt)
 values ($1, $2, $3, $4)

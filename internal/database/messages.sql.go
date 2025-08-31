@@ -45,7 +45,7 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (M
 const createUser = `-- name: CreateUser :one
 insert into users(username, password_hash)
 values ($1, $2)
-returning id, username, password_hash, created_at
+returning id, email, username, password_hash, created_at
 `
 
 type CreateUserParams struct {
@@ -58,6 +58,24 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Email,
+		&i.Username,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+select id, email, username, password_hash, created_at from users where email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
 		&i.Username,
 		&i.PasswordHash,
 		&i.CreatedAt,
@@ -66,7 +84,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-select id, username, password_hash, created_at from users where username = $1
+select id, email, username, password_hash, created_at from users where username = $1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -74,6 +92,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Email,
 		&i.Username,
 		&i.PasswordHash,
 		&i.CreatedAt,
