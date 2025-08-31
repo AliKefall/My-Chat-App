@@ -1,4 +1,4 @@
-
+-- +goose Up
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email text unique not null,
@@ -16,3 +16,6 @@ CREATE TABLE messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- +goose Down
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS users;

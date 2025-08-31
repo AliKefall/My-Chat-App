@@ -1,20 +1,35 @@
 package crypting
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/hex"
 )
 
-// HashPassword -
-func HashPassword(password string) (string, error) {
-	dat, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func GenerateIV() (string, error) {
+	iv := make([]byte, 16)
+	_, err := rand.Read(iv)
 	if err != nil {
 		return "", err
 	}
-	return string(dat), nil
+
+	return hex.EncodeToString(iv), nil
 }
 
-// CheckPasswordHash -
-func CheckPasswordHash(password, hash string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func EncryptMessage(content, key, ivHex string) (string, error) {
+	iv, _ := hex.DecodeString(ivHex)
+	block, err := aes.NewCipher([]byte(key))
+	if err != nil {
+		return "", err
+	}
+
+	plaintext := []byte(content)
+	cfb := cipher.NewCFBEncrypter(block, iv)
+	ciphertext := make([]byte, len(plaintext))
+	cfb.XORKeyStream(ciphertext, plaintext)
+
+	return hex.EncodeToString(ciphertext), nil
+
 }
 

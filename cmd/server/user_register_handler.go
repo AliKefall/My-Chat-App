@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/AliKefall/My-Chat-App/auth"
 	"github.com/AliKefall/My-Chat-App/crypting"
 	"github.com/AliKefall/My-Chat-App/internal/database"
 )
@@ -34,5 +35,13 @@ func (s *Server) handleUserRegister(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(user)
+	token, err := auth.GenerateJWT(user.Username, int64(user.ID))
+	if err != nil {
+		http.Error(w, "could not generate token", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": token,
+	})
 }
