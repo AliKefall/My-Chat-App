@@ -1,21 +1,22 @@
+
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Login</title>
-		<link href="/static/css/style.css" rel="stylesheet">
-	</head>
-	<body>
-		<h1>Login</h1>
-		<form id="loginForm">
-			<input type="text" name="username" placeholder="Username" required>
-			<input type="password" name="password" placeholder="Password" required>
-			<button type="submit">Login</button>
-		</form>
-		<script src="/static/js/login.js">
-			
-		</script>
-	
-	</body>
-</html> 
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <h2>Login</h2>
+  <form id="login-form">
+    <input type="text" id="username" placeholder="Kullanıcı adı" required><br><br>
+    <input type="password" id="password" placeholder="Şifre" required><br><br>
+    <button type="submit">Giriş Yap</button>
+  </form>
+
+  <p>Hesabın yok mu? <a href="/register.html">Kayıt Ol</a></p>
+
+  <script src="/static/js/login.js"></script>
+</body>
+</html>
+

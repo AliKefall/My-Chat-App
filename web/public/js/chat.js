@@ -1,45 +1,57 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+	// LocalStorage’dan JWT’yi al
 	const token = localStorage.getItem("token");
-
 	if (!token) {
-		alert("You must be logged in first!");
-		window.location.href = "/pages/login.html";
+		alert("Lütfen önce giriş yapın!");
+		window.location.href = "/login.html";
 		return;
 	}
 
-	const socket = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
-	const messagesDiv = document.getElementById("messages");
-	const input = document.getElementById("messageInput");
-	const sendBtn = document.getElementById("sendBtn");
+	// ✅ WebSocket bağlantısını başlat
+	const ws = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
 
-	socket.onopen = () => {
-		console.log("Connected to chat server");
-	};
+	const chatBox = document.getElementById("chat-box");
+	const messageInput = document.getElementById("message-input");
+	const sendButton = document.getElementById("send-btn");
 
-	socket.onmessage = (event) => {
+	// Mesaj geldiğinde ekrana yaz
+	ws.onmessage = (event) => {
 		const msg = JSON.parse(event.data);
-		const messageElement = document.createElement("div");
-		messageElement.textContent = `${msg.user}: ${msg.message}`;
-		messagesDiv.appendChild(messageElement);
+		const el = document.createElement("div");
+		el.innerHTML = `<b>${msg.user}:</b> ${msg.message}`;
+		chatBox.appendChild(el);
+		chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
 	};
 
-	socket.onclose = () => {
-		console.log("Disconnected from chat server");
+	// Bağlantı açıldığında
+	ws.onopen = () => {
+		console.log("✅ WebSocket connected!");
 	};
 
-	sendBtn.addEventListener("click", () => {
-		const message = input.value.trim();
-		if (message !== "") {
-			socket.send(JSON.stringify({ message }));
-			input.value = "";
+	ws.onerror = (err) => {
+		console.error("❌ WebSocket error:", err);
+	};
+
+	ws.onclose = () => {
+		console.log("❌ WebSocket closed!");
+	};
+
+	// Mesaj gönder
+	sendButton.addEventListener("click", () => {
+		const msg = messageInput.value.trim();
+		if (msg) {
+			ws.send(JSON.stringify({ message: msg }));
+			messageInput.value = "";
 		}
 	});
 
-	input.addEventListener("keypress", (e) => {
+	// Enter tuşu ile gönder
+	messageInput.addEventListener("keypress", (e) => {
 		if (e.key === "Enter") {
-			sendBtn.click();
+			sendButton.click();
 		}
 	});
 });
+
 

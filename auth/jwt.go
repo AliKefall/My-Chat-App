@@ -1,12 +1,22 @@
 package auth
 
 import (
+	"log"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("supersecretkey")
+var jwtKey []byte
+
+func init() {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("JWT_SECRET environment variable not set")
+	}
+	jwtKey = []byte(secret)
+}
 
 type Claims struct {
 	Username string `json:"username"`
@@ -26,7 +36,6 @@ func GenerateJWT(username string, userID int64) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtKey)
-
 }
 
 func ValidateJWT(tokenStr string) (*Claims, error) {
@@ -38,5 +47,4 @@ func ValidateJWT(tokenStr string) (*Claims, error) {
 		return nil, err
 	}
 	return claims, nil
-
 }

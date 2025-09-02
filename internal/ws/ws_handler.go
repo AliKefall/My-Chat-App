@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/AliKefall/My-Chat-App/auth"
@@ -9,7 +10,7 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // Lokal geliştirme için açık, prod'da sıkılaştır
+		return true // geliştirme için açık, prod ortamında domain check yap
 	},
 }
 
@@ -46,11 +47,13 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.Register:
 			h.Clients[client] = true
+
 		case client := <-h.Unregister:
 			if _, ok := h.Clients[client]; ok {
 				delete(h.Clients, client)
 				close(client.Send)
 			}
+
 		case msg := <-h.Broadcast:
 			for client := range h.Clients {
 				select {
@@ -64,8 +67,37 @@ func (h *Hub) Run() {
 	}
 }
 
-// WebSocket handler
+// ✅ readPump: sadece istemciden okuma yapar
+func (c *Client) readPump(hub *Hub) {
+	defer func() {
+		hub.Unregister <- c
+		c.Conn.Close()
+	}()
+	for {
+		var msg Message
+		if err := c.Conn.ReadJSON(&msg); err != nil {
+			log.Println("read error:", err)
+			break
+		}
+		msg.User = c.User
+		hub.Broadcast <- msg
+	}
+}
+
+// ✅ writePump: sadece client.Send’den gelen mesajları yazar
+func (c *Client) writePump() {
+	defer c.Conn.Close()
+	for msg := range c.Send {
+		if err := c.Conn.WriteJSON(msg); err != nil {
+			log.Println("write error:", err)
+			break
+		}
+	}
+}
+
+// ✅ ServeWs: bağlantı kurar, read/write pump başlatır
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+	// 🔑 Token doğrulama
 	token := r.URL.Query().Get("token")
 	if token == "" {
 		http.Error(w, "missing token", http.StatusUnauthorized)
@@ -78,38 +110,23 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 🔑 WebSocket upgrade
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		log.Println("upgrade error:", err)
 		return
 	}
 
 	client := &Client{
 		Conn: conn,
-		Send: make(chan Message),
+		Send: make(chan Message, 256), // buffered → yavaş client sistemi tıkamaz
 		User: claims.Username,
 		ID:   claims.UserID,
 	}
 
 	hub.Register <- client
 
-	// Mesaj alma
-	go func() {
-		defer func() { hub.Unregister <- client }()
-		for {
-			var msg Message
-			err := conn.ReadJSON(&msg)
-			if err != nil {
-				break
-			}
-			msg.User = client.User
-			hub.Broadcast <- msg
-		}
-	}()
-
-	// Mesaj gönderme
-	go func() {
-		for m := range client.Send {
-			conn.WriteJSON(m)
-		}
-	}()
+	// Okuma ve yazma pump’larını başlat
+	go client.readPump(hub)
+	go client.writePump()
 }
