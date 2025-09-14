@@ -7,12 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		const username = document.getElementById("username").value.trim();
 		const password = document.getElementById("password").value.trim();
-
+		const email = document.getElementById("email").value.trim();
 		try {
 			const res = await fetch("/api/login", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username, password }),
+				body: JSON.stringify({ email, username, password }),
 			});
 
 			if (!res.ok) {

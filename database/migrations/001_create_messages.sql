@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    email text unique not null,
+    email TEXT UNIQUE NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

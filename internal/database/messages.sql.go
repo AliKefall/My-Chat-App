@@ -43,18 +43,19 @@ func (q *Queries) CreateMessage(ctx context.Context, arg CreateMessageParams) (M
 }
 
 const createUser = `-- name: CreateUser :one
-insert into users(username, password_hash)
-values ($1, $2)
+insert into users(email ,username, password_hash)
+values ($1, $2, $3)
 returning id, email, username, password_hash, created_at
 `
 
 type CreateUserParams struct {
+	Email        string `json:"email"`
 	Username     string `json:"username"`
 	PasswordHash string `json:"password_hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.PasswordHash)
+	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.Username, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,
