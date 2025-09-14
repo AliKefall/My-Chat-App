@@ -50,7 +50,7 @@ func main() {
 
 	srv.Router.HandleFunc("POST /api/register", srv.handleUserRegister)
 
-	srv.Router.HandleFunc("POST /api/login", srv.handleUserLogin)
+	srv.Router.HandleFunc("POST /api/login", http.HandlerFunc(srv.handleUserLogin))
 
 	log.Println("✅ Server is running at: http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":"+srv.PORT, srv.Router))

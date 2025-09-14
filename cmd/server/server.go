@@ -27,6 +27,7 @@ func NewServer(dbConn *sql.DB, port string) *Server {
 	return s
 }
 
+// This part is totally unnecessary for now but will be used in the future. It is a middleware that checks for the presence of a valid JWT token in the Authorization header of incoming requests. If the token is valid, it adds the user information to the request context and calls the next handler. If the token is missing or invalid, it responds with an unauthorized error.
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
