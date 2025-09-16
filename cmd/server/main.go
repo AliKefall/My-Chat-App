@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/AliKefall/My-Chat-App/internal/ws"
 	"github.com/joho/godotenv"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(filepath.Join(".", ".env")); err != nil {
 		log.Println("⚠️ No .env file found, using system environment variables")
 	}
 
@@ -50,7 +51,7 @@ func main() {
 
 	srv.Router.HandleFunc("POST /api/register", srv.handleUserRegister)
 
-	srv.Router.HandleFunc("POST /api/login", http.HandlerFunc(srv.handleUserLogin))
+	srv.Router.Handle("POST /api/login", http.HandlerFunc(srv.handleUserLogin))
 
 	log.Println("✅ Server is running at: http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":"+srv.PORT, srv.Router))
