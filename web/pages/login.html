@@ -1,22 +1,60 @@
+
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <title>Login</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-  <h2>Login</h2>
-  <form id="login-form">
-      <input type="email" id="email" placeholder="Email" required><br><br>
-    <input type="text" id="username" placeholder="Kullanıcı adı" required><br><br>
-    <input type="password" id="password" placeholder="Şifre" required><br><br>
-    <button type="submit">Giriş Yap</button>
-  </form>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Giriş Yap</h1>
+      <form id="login-form" class="space-y-4">
+        
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">E-posta</label>
+          <input
+            type="email"
+            id="email"
+            class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-  <p>Hesabın yok mu? <a href="/register.html">Kayıt Ol</a></p>
+        <!-- Username -->
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700">Kullanıcı Adı</label>
+          <input
+            type="text"
+            id="username"
+            class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-  <script src="/static/js/login.js"></script>
-</body>
+        <!-- Password -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Şifre</label>
+          <input
+            type="password"
+            id="password"
+            class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          Giriş Yap
+        </button>
+      </form>
+    </div>
+    <script src="/static/js/login.js"></script>
+  </body>
 </html>
 
