@@ -1,17 +1,49 @@
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Chat Room</title>
-  <link rel="stylesheet" href="/public/css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Chat Room</h2>
-  <div id="chat-box" style="border:1px solid #ccc; height:300px; overflow-y:scroll; padding:5px; margin-bottom:10px;"></div>
+<body class="h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white flex flex-col">
 
-  <input id="message-input" type="text" placeholder="Mesaj yaz..." style="width:70%">
-  <button id="send-btn">Gönder</button>
+  <!-- Header -->
+  <header class="flex items-center justify-between px-6 py-4 bg-gray-800 shadow-md">
+    <h1 class="text-xl font-bold">💬 Chat Room</h1>
+    <button 
+      id="logoutBtn" 
+      class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition duration-200"
+    >
+      Logout
+    </button>
+  </header>
+
+  <!-- Chat Container -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+    <!-- Messages Area -->
+    <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3">
+      <!-- Messages will be appended here -->
+    </div>
+
+    <!-- Input Area -->
+    <form id="chatForm" class="flex items-center p-4 bg-gray-800 border-t border-gray-700">
+      <input
+        type="text"
+        id="messageInput"
+        placeholder="Type your message..."
+        required
+        class="flex-1 px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        type="submit"
+        class="ml-3 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition duration-200"
+      >
+        Send
+      </button>
+    </form>
+  </main>
 
   <script src="/static/js/chat.js"></script>
 </body>

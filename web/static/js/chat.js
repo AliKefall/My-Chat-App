@@ -1,57 +1,61 @@
 
 document.addEventListener("DOMContentLoaded", () => {
-	// LocalStorage’dan JWT’yi al
-	const token = localStorage.getItem("token");
-	if (!token) {
-		alert("Lütfen önce giriş yapın!");
-		window.location.href = "/login.html";
-		return;
-	}
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
 
-	// ✅ WebSocket bağlantısını başlat
-	const ws = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
+    if (!token || !username) {
+        alert("Önce giriş yapmalısınız!");
+        window.location.href = "/login.html";
+        return;
+    }
 
-	const chatBox = document.getElementById("chat-box");
-	const messageInput = document.getElementById("message-input");
-	const sendButton = document.getElementById("send-btn");
+    // 🔗 WebSocket bağlantısı
+    const socket = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
 
-	// Mesaj geldiğinde ekrana yaz
-	ws.onmessage = (event) => {
-		const msg = JSON.parse(event.data);
-		const el = document.createElement("div");
-		el.innerHTML = `<b>${msg.user}:</b> ${msg.message}`;
-		chatBox.appendChild(el);
-		chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
-	};
+    socket.addEventListener("open", () => {
+        console.log("✅ WebSocket bağlantısı kuruldu.");
+    });
 
-	// Bağlantı açıldığında
-	ws.onopen = () => {
-		console.log("✅ WebSocket connected!");
-	};
+    socket.addEventListener("message", (event) => {
+        const data = JSON.parse(event.data);
 
-	ws.onerror = (err) => {
-		console.error("❌ WebSocket error:", err);
-	};
+        // Gelen mesajları ekrana yaz
+        const messages = document.getElementById("messages");
+        const msgDiv = document.createElement("div");
 
-	ws.onclose = () => {
-		console.log("❌ WebSocket closed!");
-	};
+        msgDiv.className = "p-2 my-1 rounded-lg " +
+            (data.username === username
+                ? "bg-blue-500 text-white self-end text-right"
+                : "bg-gray-200 text-black self-start text-left");
 
-	// Mesaj gönder
-	sendButton.addEventListener("click", () => {
-		const msg = messageInput.value.trim();
-		if (msg) {
-			ws.send(JSON.stringify({ message: msg }));
-			messageInput.value = "";
-		}
-	});
+        msgDiv.textContent = `${data.username}: ${data.content}`;
+        messages.appendChild(msgDiv);
 
-	// Enter tuşu ile gönder
-	messageInput.addEventListener("keypress", (e) => {
-		if (e.key === "Enter") {
-			sendButton.click();
-		}
-	});
+        // Otomatik scroll
+        messages.scrollTop = messages.scrollHeight;
+    });
+
+    socket.addEventListener("close", () => {
+        console.log("❌ WebSocket bağlantısı kapandı.");
+    });
+
+    // 📨 Mesaj gönderme
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("message");
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const message = input.value.trim();
+        if (!message) return;
+
+        const payload = {
+            type: "message",
+            content: message,
+            username: username,
+        };
+
+        socket.send(JSON.stringify(payload));
+        input.value = "";
+    });
 });
-
 
